@@ -1,6 +1,6 @@
 import type { Node, Connection } from './components/node'
 
-export const dijkstra = (nodes: Node[], connections: Connection[], start: number, end: number) => {
+export const dijkstra = (nodes: Node[], connections: Connection[], start: number, end: number): { path: number[], distance: number } => {
   const distance = Array(nodes.length).fill(Infinity);
   const previous = Array(nodes.length);
   const unvisited = [...Array(nodes.length).keys()];
@@ -41,5 +41,5 @@ export const dijkstra = (nodes: Node[], connections: Connection[], start: number
     u = previous[u];
   }
 
-  return S;
+  return { path: S, distance: distance[end] };
 }

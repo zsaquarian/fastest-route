@@ -3,17 +3,18 @@
 	import type { Node, Connection } from '../lib/components/node';
 	import { type Delivery, Fragility } from '../lib/delivery';
 	import { dijkstra } from '../lib/dijkstra';
+	import { bestTruck, type Truck } from '../lib/truck';
 
-	let nodes: Node[] = [
+	const nodes: Node[] = [
 		{ x: 7, y: 5, name: 'Hoodi' },
 		{ x: 8, y: 1, name: 'KR Puram' },
 		{ x: 1, y: 2, name: 'Brookefield' },
 		{ x: 5, y: 3, name: 'Indiranagar' },
 		{ x: 4, y: 5, name: 'MG Road' },
-		{ x: 6, y: 2, name: 'Koramangala' }
+		{ x: 5, y: 1, name: 'Koramangala' }
 	];
 
-  let connections: Connection[] = [
+  const connections: Connection[] = [
     { node1: 2, node2: 3, distance: 100 },
     { node1: 3, node2: 1, distance: 70 },
     { node1: 3, node2: 0, distance: 60 },
@@ -23,6 +24,12 @@
     { node1: 3, node2: 4, distance: 50 },
   ];
 
+  const trucks: Truck[] = [
+    { capacity: 50, speed: 75 },
+    { capacity: 25, speed: 20 },
+    { capacity: 100, speed: 100 },
+  ];
+
   let newFrom: string;
   let newTo: string;
   let newWeight: number;
@@ -30,7 +37,9 @@
 
   let deliveries: Delivery[] = [];
 
-  let paths: number[][] = [];
+  const paths: number[][] = [];
+  const distances: number[] = [];
+  const bestTrucks = [];
 
   let selectedPath: number[] = [];
 </script>
@@ -54,12 +63,17 @@
         fragility: newFragility,
         weight: newWeight
       }];
+
       newFrom = '';
       newTo = '';
       newWeight = 0;
-      console.log(deliveries);
-      paths.push(dijkstra(nodes, connections, fromLocation, toLocation));
-      console.log(paths);
+
+      const dijkstraResult = dijkstra(nodes, connections, fromLocation, toLocation)
+
+      paths.push(dijkstraResult.path);
+      distances.push(dijkstraResult.distance);
+
+      bestTrucks.push(bestTruck(trucks, deliveries[deliveries.length - 1], distances[distances.length - 1]));
     }}>
       <input class="in" placeholder="From" type="text" bind:value={newFrom}>
       <input class="in" placeholder="To" type="text" bind:value={newTo}>
@@ -84,8 +98,24 @@
           <p>To: {nodes[to].name}</p>
           <p>Weight: {weight} kg</p>
           <p>Fragility: {Fragility[fragility]}</p>
+          <p>Distance: {distances[i]} km</p>
+          <p>Truck: {bestTrucks[i].bestTruck + 1}</p>
+          <p>Time: {bestTrucks[i].time} h</p>
         </li>
       {/each}
     </ul>
+    <div class="mt-auto">
+      <h2 class="text-center text-2xl">Knowledge base</h2>
+      <table class="w-full">
+        <thead><td>Number</td><td>Speed</td><td>Capacity</td></thead>
+        {#each trucks as { speed, capacity }, i} 
+          <tr class:bg-gray-200={i % 2 === 0} class:bg-gray-100={i % 2 === 1}>
+            <td>{i + 1}</td> 
+            <td>{speed}</td>
+            <td>{capacity}</td>
+          </tr>
+        {/each}
+      </table>
+    </div>
   </div>
 </div>
